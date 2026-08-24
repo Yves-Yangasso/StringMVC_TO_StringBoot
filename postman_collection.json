@@ -1,0 +1,560 @@
+{
+  "info": {
+    "name": "StringMVC_TO_StringBoot - API",
+    "description": "Tests de l'API REST (Produit / TypeProduit).\n\nLes requetes sont ordonnees : elles creent un type produit, puis un produit, les relisent, testent la validation et les erreurs 404, puis nettoient les donnees creees.\n\nLancer l'application (port 8080) puis executer la collection avec le Collection Runner ou Newman.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "typeProduitLibelle",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "typeProduitId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "produitLibelle",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "produitId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "idInexistant",
+      "value": "999999999",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Type Produit",
+      "item": [
+        {
+          "name": "POST - Creer un type produit",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('typeProduitLibelle', 'Type Test ' + Date.now());"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Statut 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Message de confirmation', function () {",
+                  "    pm.expect(pm.response.text()).to.include('type produit ajoute avec succes');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"libelle\": \"{{typeProduitLibelle}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/typeproduit",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "typeproduit"]
+            }
+          }
+        },
+        {
+          "name": "GET - Liste des types produits",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Statut 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var liste = pm.response.json();",
+                  "",
+                  "pm.test('La reponse est un tableau', function () {",
+                  "    pm.expect(liste).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test('Le type produit cree est present', function () {",
+                  "    var libelle = pm.collectionVariables.get('typeProduitLibelle');",
+                  "    var trouve = liste.find(function (t) { return t.libelle === libelle; });",
+                  "    pm.expect(trouve, 'type produit cree introuvable dans la liste').to.not.be.undefined;",
+                  "    pm.collectionVariables.set('typeProduitId', trouve.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/typeproduit",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "typeproduit"]
+            }
+          }
+        },
+        {
+          "name": "GET - Type produit par id",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Statut 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Id et libelle corrects', function () {",
+                  "    var t = pm.response.json();",
+                  "    pm.expect(String(t.id)).to.eql(String(pm.collectionVariables.get('typeProduitId')));",
+                  "    pm.expect(t.libelle).to.eql(pm.collectionVariables.get('typeProduitLibelle'));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/typeproduit/{{typeProduitId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "typeproduit", "{{typeProduitId}}"]
+            }
+          }
+        },
+        {
+          "name": "POST - Type produit invalide (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Statut 400', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('Erreur de validation sur le libelle', function () {",
+                  "    var erreurs = pm.response.json();",
+                  "    pm.expect(erreurs).to.have.property('libelle');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"libelle\": \"A\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/typeproduit",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "typeproduit"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Produit",
+      "item": [
+        {
+          "name": "POST - Creer un produit",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('produitLibelle', 'Produit Test ' + Date.now());"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Statut 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Message de confirmation', function () {",
+                  "    pm.expect(pm.response.text()).to.include('produit ajoute avec succes');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"libelle\": \"{{produitLibelle}}\",\n  \"prix\": 1500.5,\n  \"typeProduitId\": {{typeProduitId}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/produit",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "produit"]
+            }
+          }
+        },
+        {
+          "name": "GET - Liste des produits (pagination)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Statut 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var liste = pm.response.json();",
+                  "",
+                  "pm.test('La reponse est un tableau', function () {",
+                  "    pm.expect(liste).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test('La taille de page est respectee', function () {",
+                  "    pm.expect(liste.length).to.be.at.most(100);",
+                  "});",
+                  "",
+                  "pm.test('Le produit cree est present', function () {",
+                  "    var libelle = pm.collectionVariables.get('produitLibelle');",
+                  "    var trouve = liste.find(function (p) { return p.libelle === libelle; });",
+                  "    pm.expect(trouve, 'produit cree introuvable dans la page demandee').to.not.be.undefined;",
+                  "    pm.collectionVariables.set('produitId', trouve.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/produit?page=0&size=100",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "produit"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "100"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET - Produit par id",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Statut 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Le DTO est complet', function () {",
+                  "    var p = pm.response.json();",
+                  "    pm.expect(String(p.id)).to.eql(String(pm.collectionVariables.get('produitId')));",
+                  "    pm.expect(p.libelle).to.eql(pm.collectionVariables.get('produitLibelle'));",
+                  "    pm.expect(p.prix).to.eql(1500.5);",
+                  "    pm.expect(String(p.typeProduitId)).to.eql(String(pm.collectionVariables.get('typeProduitId')));",
+                  "    pm.expect(p.typeProduitLibelle).to.eql(pm.collectionVariables.get('typeProduitLibelle'));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/produit/{{produitId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "produit", "{{produitId}}"]
+            }
+          }
+        },
+        {
+          "name": "POST - Produit invalide (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Statut 400', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('Toutes les erreurs de validation sont remontees', function () {",
+                  "    var erreurs = pm.response.json();",
+                  "    pm.expect(erreurs).to.have.property('libelle');",
+                  "    pm.expect(erreurs).to.have.property('prix');",
+                  "    pm.expect(erreurs).to.have.property('typeProduitId');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"libelle\": \"\",\n  \"prix\": 0,\n  \"typeProduitId\": null\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/produit",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "produit"]
+            }
+          }
+        },
+        {
+          "name": "POST - Produit avec type inexistant (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Statut 404', function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "",
+                  "pm.test('Message : type de produit introuvable', function () {",
+                  "    pm.expect(pm.response.json().message).to.include('Type de produit introuvable');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"libelle\": \"Produit type inexistant\",\n  \"prix\": 10,\n  \"typeProduitId\": {{idInexistant}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/produit",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "produit"]
+            }
+          }
+        },
+        {
+          "name": "GET - Produit inexistant (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Statut 404', function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "",
+                  "pm.test('Message : produit introuvable', function () {",
+                  "    pm.expect(pm.response.json().message).to.include('Produit introuvable');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/produit/{{idInexistant}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "produit", "{{idInexistant}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Nettoyage",
+      "item": [
+        {
+          "name": "DELETE - Supprimer le produit",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Statut 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Message de confirmation', function () {",
+                  "    pm.expect(pm.response.text()).to.include('produit supprime avec succes');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/produit/delete/{{produitId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "produit", "delete", "{{produitId}}"]
+            }
+          }
+        },
+        {
+          "name": "GET - Produit supprime (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Statut 404 apres suppression', function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/produit/{{produitId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "produit", "{{produitId}}"]
+            }
+          }
+        },
+        {
+          "name": "DELETE - Supprimer le type produit",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Statut 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Message de confirmation', function () {",
+                  "    pm.expect(pm.response.text()).to.include('type produit supprime avec succes');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/typeproduit/delete/{{typeProduitId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "typeproduit", "delete", "{{typeProduitId}}"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

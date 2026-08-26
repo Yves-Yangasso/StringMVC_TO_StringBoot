@@ -3,16 +3,21 @@ package diti.entity;
 
 import jakarta.persistence.*;
 
+import java.util.UUID;
+
 @Entity
 @Table(name = "products")
 public class Produit {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(nullable = false, updatable = false)
+    private UUID id;
 
+    @Column(nullable = false)
     private String libelle;
 
+    @Column(nullable = false)
     private double prix;
 
     @ManyToOne
@@ -22,17 +27,17 @@ public class Produit {
     public Produit() {
     }
 
-    public Produit(Long id, String libelle, double prix) {
+    public Produit(UUID id, String libelle, double prix) {
         this.id = id;
         this.libelle = libelle;
         this.prix = prix;
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

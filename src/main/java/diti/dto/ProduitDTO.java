@@ -1,14 +1,21 @@
 package diti.dto;
 
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+import java.util.UUID;
+
 public class ProduitDTO {
 
-    private Long id;
+    // Genere par le serveur : un id envoye par le client est ignore.
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
+    private UUID id;
 
     @NotBlank(message = "Le libelle est obligatoire")
     @Size(min = 2, max = 100, message = "Le libelle doit contenir entre {min} et {max} caracteres")
@@ -18,14 +25,14 @@ public class ProduitDTO {
     private double prix;
 
     @NotNull(message = "Le type est obligatoire")
-    private Long typeProduitId;
+    private UUID typeProduitId;
 
     private String typeProduitLibelle;
 
     public ProduitDTO() {
     }
 
-    public ProduitDTO(Long id, String libelle, double prix, Long typeProduitId, String typeProduitLibelle) {
+    public ProduitDTO(UUID id, String libelle, double prix, UUID typeProduitId, String typeProduitLibelle) {
         this.id = id;
         this.libelle = libelle;
         this.prix = prix;
@@ -33,11 +40,11 @@ public class ProduitDTO {
         this.typeProduitLibelle = typeProduitLibelle;
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
@@ -57,11 +64,11 @@ public class ProduitDTO {
         this.prix = prix;
     }
 
-    public Long getTypeProduitId() {
+    public UUID getTypeProduitId() {
         return typeProduitId;
     }
 
-    public void setTypeProduitId(Long typeProduitId) {
+    public void setTypeProduitId(UUID typeProduitId) {
         this.typeProduitId = typeProduitId;
     }
 

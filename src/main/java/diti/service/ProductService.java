@@ -2,6 +2,7 @@ package diti.service;
 
 import diti.entity.Produit;
 import java.util.List;
+import java.util.UUID;
 
 public interface ProductService {
 
@@ -11,7 +12,7 @@ public interface ProductService {
 
     List<Produit> findAll(int page, int size);
 
-    Produit findById(Long id);
+    Produit findById(UUID id);
 
-    void delete(Long id);
+    void delete(UUID id);
 }

@@ -2,12 +2,15 @@ package diti.service.impl;
 
 
 import diti.entity.TypeProduit;
+import diti.exception.DuplicateResourceException;
+import diti.exception.ResourceNotFoundException;
 import diti.repository.TypeProduitRepository;
 import diti.service.TypeProduitService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class TypeProduitServiceImpl implements TypeProduitService {
@@ -17,6 +20,9 @@ public class TypeProduitServiceImpl implements TypeProduitService {
 
     @Override
     public void save(TypeProduit typeProduit) {
+        if (repository.existsByLibelleIgnoreCase(typeProduit.getLibelle())) {
+            throw DuplicateResourceException.typeProduit(typeProduit.getLibelle());
+        }
         repository.save(typeProduit);
     }
 
@@ -26,12 +32,13 @@ public class TypeProduitServiceImpl implements TypeProduitService {
     }
 
     @Override
-    public TypeProduit findById(Long id) {
-        return repository.findById(id).orElse(null);
+    public TypeProduit findById(UUID id) {
+        return repository.findById(id)
+                .orElseThrow(() -> ResourceNotFoundException.typeProduit(id));
     }
 
     @Override
-    public void delete(Long id) {
-        repository.findById(id).ifPresent(repository::delete);
+    public void delete(UUID id) {
+        repository.delete(findById(id));
     }
 }

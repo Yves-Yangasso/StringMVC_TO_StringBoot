@@ -3,11 +3,12 @@ package diti.mapper;
 import diti.dto.ProduitDTO;
 import diti.entity.Produit;
 import diti.entity.TypeProduit;
-import diti.exception.ResourceNotFoundException;
 import diti.service.TypeProduitService;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.UUID;
 
 @Mapper(componentModel = "spring")
 public abstract class ProduitMapper {
@@ -22,19 +23,12 @@ public abstract class ProduitMapper {
     @Mapping(source = "typeProduitId", target = "typeProduit")
     public abstract Produit toEntity(ProduitDTO dto);
 
-    protected TypeProduit mapTypeProduit(Long typeProduitId) {
+    protected TypeProduit mapTypeProduit(UUID typeProduitId) {
         if (typeProduitId == null) {
             return null;
         }
 
-        TypeProduit typeProduit = typeProduitService.findById(typeProduitId);
-
-        if (typeProduit == null) {
-            throw new ResourceNotFoundException(
-                    "Type de produit introuvable avec l'id " + typeProduitId
-            );
-        }
-
-        return typeProduit;
+        // findById leve ResourceNotFoundException si le type n'existe pas
+        return typeProduitService.findById(typeProduitId);
     }
 }

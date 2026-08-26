@@ -1,6 +1,7 @@
 package diti.service.impl;
 
 import diti.entity.Produit;
+import diti.exception.DuplicateResourceException;
 import diti.exception.ResourceNotFoundException;
 import diti.repository.ProductRepository;
 import diti.service.ProductService;
@@ -10,6 +11,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -19,6 +21,9 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public void save(Produit product) {
+        if (repository.existsByLibelleIgnoreCase(product.getLibelle())) {
+            throw DuplicateResourceException.produit(product.getLibelle());
+        }
         repository.save(product);
     }
 
@@ -44,16 +49,14 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Produit findById(Long id) {
+    public Produit findById(UUID id) {
 
         return repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Produit introuvable avec l'id " + id
-                ));
+                .orElseThrow(() -> ResourceNotFoundException.produit(id));
     }
 
     @Override
-    public void delete(Long id) {
-        repository.findById(id).ifPresent(repository::delete);
+    public void delete(UUID id) {
+        repository.delete(findById(id));
     }
 }

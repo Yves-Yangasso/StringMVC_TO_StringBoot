@@ -2,6 +2,7 @@ package diti.service;
 
 import diti.entity.TypeProduit;
 import java.util.List;
+import java.util.UUID;
 
 public interface TypeProduitService {
 
@@ -9,7 +10,7 @@ public interface TypeProduitService {
 
     List<TypeProduit> findAll();
 
-    TypeProduit findById(Long id);
+    TypeProduit findById(UUID id);
 
-    void delete(Long id);
+    void delete(UUID id);
 }
